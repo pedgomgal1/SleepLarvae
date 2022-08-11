@@ -1,6 +1,7 @@
 clear all
 close all
 warning 'off'
+
 %1. Split original images in individual wells per genotype
 addpath(genpath('src'))
 
@@ -12,5 +13,5 @@ else
     directoryROIs = uigetdir('..','Choose directory of ROIs of a specific phenotype');
 end
 
-%2. Check bouts of individual 
+%2. Check bouts of individual larvae
 countBoutsPerHour(directoryROIs)
