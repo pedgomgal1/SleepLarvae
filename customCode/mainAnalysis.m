@@ -12,8 +12,8 @@ alldirs=cell(size(allGenotypes));
 
 allAverageBouts = zeros(12,length(allGenotypes));
 allVarBouts = zeros(12,length(allGenotypes));
-
-figure;hold on;
+h = figure('units','normalized','outerposition',[0 0 1 1],'Visible','on');
+hold on;
 for nGen = 1:length(allGenotypes)
     dirBouts=dir(fullfile(rootDirectory,'*','Processing',allGenotypes{nGen},'ROI_*','boutsData','boutsPerHour.mat'));
     percBoutsPerHour = zeros(12,size(dirBouts,1));
@@ -26,17 +26,26 @@ for nGen = 1:length(allGenotypes)
     allAverageBouts(:,nGen)=averBouts;
 
     varBouts = var(percBoutsPerHour,[],2);
+%     varBouts = std(percBoutsPerHour,[],2);
+
     allVarBouts(:,nGen)=varBouts;
 
 end
 
 bar(allAverageBouts)
 ylim([0 1])
-ylabel('activity / sleep bouts proportion')
+xticks(1:12)
+yticks(0:0.1:1)
+ylabel('activity / resting proportion')
 xlabel('hour')
 legend(allGenotypes)
 hold on
 errorbar([cellBouts.hour-0.225,cellBouts.hour,cellBouts.hour+0.225],allAverageBouts,allVarBouts,'Color',[0 0 0],'LineStyle','none')
+set(gca,'FontSize', 24,'FontName','Helvetica');
+set(gca,'innerposition');
+
+% exportgraphics(ax,fullfile(path2save,['heatMap_varianceVolume_Gland_' date '.png']),'Resolution',600)
+
 
 %Histogram bouts per hour
 
