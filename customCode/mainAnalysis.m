@@ -20,10 +20,17 @@ allNames = cell(length(allGenotypes),1);
 for nGen = 1:length(allGenotypes)
     dirBouts=dir(fullfile(rootDirectory,'*','Processing',allGenotypes{nGen},'ROI_*','boutsData','boutsPerHour.mat'));
     percBoutsPerHour = zeros(12,size(dirBouts,1));
+    allBoutsPerGenotype = cell(size(dirBouts));
     for nFil = 1:size(dirBouts,1)
         load(fullfile(dirBouts(nFil).folder,dirBouts(nFil).name),'cellBouts');
-        percBoutsPerHour(:,nFil) = cellfun(@(x) sum(x==1)/(sum(x==0)+sum(x==1)),cellBouts.bouts);        
+        percBoutsPerHour(:,nFil) = cellfun(@(x) sum(x==1)/(sum(x==0)+sum(x==1)),cellBouts.bouts);     
+        allBoutsPerGenotype{nFil} = cellBouts;
     end
+
+%     figure
+%     binranges = 0:0.05:2;
+%     [bincounts] = histc(percBoutsPerHour(1,:)+percBoutsPerHour(2,:),binranges);
+%     bar(binranges,bincounts,'histc');
 
 
     averBouts = mean(percBoutsPerHour,2);
@@ -40,22 +47,27 @@ for nGen = 1:length(allGenotypes)
 
 end
 
-%Histogram bouts per hour
-
-bar(allAverageBouts)
-ylim([0 1])
-xticks(1:12)
-yticks(0:0.1:1)
-ylabel('activity / resting proportion')
-xlabel('hour')
-legend(allGenotypes)
-hold on
-errorbar([cellBouts.hour-0.225,cellBouts.hour,cellBouts.hour+0.225],allAverageBouts,allVarBouts,'Color',[0 0 0],'LineStyle','none')
-set(gca,'FontSize', 24,'FontName','Helvetica');
-set(gca,'innerposition');
-
-% exportgraphics(ax,fullfile(path2save,['heatMap_varianceVolume_Gland_' date '.png']),'Resolution',600)
-
+% %Histogram bouts per hour
+% b=bar(allAverageBouts);
+% b(1).FaceColor = [0 0 1];
+% b(2).FaceColor = [1 0.5 0];
+% b(3).FaceColor = [0 1 0];
+% 
+% 
+% ylim([0 1])
+% xticks(1:12)
+% yticks(0:0.1:1)
+% ylabel('activity / resting proportion')
+% xlabel('hour')
+% hold on
+% errorbar([cellBouts.hour-0.225,cellBouts.hour,cellBouts.hour+0.225],allAverageBouts,allVarBouts,'Color',[0 0 0],'LineStyle','none')
+% set(gca,'FontSize', 18,'FontName','Arial');
+% set(gca,'innerposition');
+% legend('Control','G2019S','A53T','','','')
+% 
+% path2save = '../data/12h';
+% print(h,fullfile(path2save,['sleep_bouts_' date '.png']),'-dpng','-r300')
+% savefig(h,fullfile(path2save,['sleep_bouts_' date '.fig']))
 
 %ANOVA with Tukey's test
 [p,t,stats] = anova1(vertcat(allPercBouts{:}),vertcat(allNames{:}));
