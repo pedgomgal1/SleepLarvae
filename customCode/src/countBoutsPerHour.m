@@ -12,7 +12,7 @@ function countBoutsPerHour(directoryROIs)
         dirROI = fullfile(directoryROIs,folderROIdir(nROIFolders).name);
         allROIdir = dir(fullfile(dirROI,'Image_*'));
         
-        disp(['Running analysis: ' folderROIdir(nROIFolders).name])
+        disp(['Running analysis: ' folderROIdir(nROIFolders).folder '-' folderROIdir(nROIFolders).name])
 %         if ~exist(fullfile(dirROI,'boutsData','boutsPerHour.mat'),'file')
             saveLarvaMovement(allROIdir,thresholdDiffPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,nImagesPerHour)
 %         end
