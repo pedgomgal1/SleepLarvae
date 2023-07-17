@@ -24,7 +24,8 @@ end
 while etime(clock,initClock) < totalRecordingsSeconds
     currentClock=clock; 
     frame = getsnapshot(v);
-    imwrite(frame,fullfile(rootFolder,folder2save,['Image_' num2str(counter) '_' num2str(currentClock(4)) 'h' num2str(currentClock(5)) 'm' num2str(floor(currentClock(6))) 's.tif']));
+    %% imwrite(frame,fullfile(rootFolder,folder2save,['Image_' num2str(counter) '_' num2str(currentClock(4)) 'h' num2str(currentClock(5)) 'm' num2str(floor(currentClock(6))) 's.tif']));
+    imwrite(frame,fullfile(rootFolder,folder2save,'StackSleep.tif'), 'WriteMode' , 'append') ;
     counter=counter+1;
     pause(acquistionImageTime-etime(clock,currentClock));
 end
