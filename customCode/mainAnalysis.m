@@ -19,7 +19,7 @@ allNames = cell(length(allGenotypes),1);
 
 for nGen = 1:length(allGenotypes)
     dirBouts=dir(fullfile(rootDirectory,'*','Processing',allGenotypes{nGen},'ROI_*','boutsData','boutsPerHour.mat'));
-    percBoutsPerHour = zeros(12,size(dirBouts,1));
+    percBoutsPerHour = zeros(6,size(dirBouts,1));
     allBoutsPerGenotype = cell(size(dirBouts));
     for nFil = 1:size(dirBouts,1)
         load(fullfile(dirBouts(nFil).folder,dirBouts(nFil).name),'cellBouts');
