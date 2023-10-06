@@ -1,12 +1,11 @@
-function backGroundImage = detectBackground(dirImages)
+function backGroundImage = detectBackground(fileName,ids)
 
-    imageAccum = imread(fullfile(dirImages(1).folder,dirImages(1).name));
+    imageAccum=imread(fileName, ids(1));
     nAccum=2;
-    for nImg =2:1:size(dirImages,1)
-        imageAccum(:,:,nAccum) = imread(fullfile(dirImages(nImg).folder,dirImages(nImg).name));
+    for nImg =2:1:length(ids)
+        imageAccum(:,:,nAccum) = imread(fileName, ids(nImg));
         nAccum=nAccum+1;
     end
-
     backGroundImage=mode(imageAccum,3);
 
 end
