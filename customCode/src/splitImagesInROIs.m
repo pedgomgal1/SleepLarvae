@@ -1,18 +1,14 @@
-function directoryROIs = splitImagesInROIs
+function [directoryROIs,ROI] = splitImagesInROIs(filePath)
 
-    [fileName,filePath] = uigetfile('*.tif','select template file to choose the ROIs per genotype');
-    
     addpath(genpath('lib'))
-    
-    imgTemplate = imread(fullfile(filePath,fileName));
+
+    imgTemplate = imread(filePath);        
     chosenPhenotype = questdlg('Choose phenotype', '','WT','G2019S','A53T','WT');
-    
-    path2save=fullfile(filePath,'Processing',chosenPhenotype);
+    [folderPath,~,~] = fileparts(filePath);
+    path2save=fullfile(folderPath,'Processing',chosenPhenotype);
     
     if ~exist(fullfile(path2save,'roiDetails.mat'),'file')
-    
-        mkdir(path2save)
-        
+        mkdir(path2save)        
         Ans = inputdlg({'Enter number of ROI'},'Manual Selection',1,{''});
         NumROI = str2num(Ans{1});
         ROI = zeros(NumROI,4);
@@ -40,16 +36,9 @@ function directoryROIs = splitImagesInROIs
             save(fullfile(path2save,'roiDetails.mat'),'ROI','ROILine')
         else 
             return;
-        end
-    
-        filePattern = fullfile(filePath, '*.tif');
-        tifFiles = dir(filePattern);
-        
-        parfor nTiffImages = 1:size(tifFiles,1)
-            imgTif = imread(fullfile(filePath,tifFiles(nTiffImages).name));
-            cropIndividualROIs(imgTif,ROI,path2save,tifFiles(nTiffImages).name)
-        end
+        end        
     else
+        load(fullfile(path2save,'roiDetails.mat'),'ROI')
         disp('remove the existing ROIs if you want to select new ones')
     end
     directoryROIs = path2save;
