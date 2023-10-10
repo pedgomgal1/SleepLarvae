@@ -4,6 +4,8 @@
 
 rootFolder = 'C:\Users\TEM\Documents\Pedro\Sleep';
 mkdir(rootFolder)
+addpath(genpath('src'))
+addpath(genpath('lib'))
 
 v = videoinput('ni', 1, 'NICFGen');
 
