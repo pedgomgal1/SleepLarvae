@@ -2,8 +2,8 @@ function directoryROIs = selectIndividualROIs(bigImgPath)
     ROItoSelect = 'Yes';
     while strcmp(ROItoSelect,'Yes')
         [directoryROIs,ROI]=splitImagesInROIs(bigImgPath);
-        cropNow = questdlg('Do you to crop the big image now?', '','Yes','No, I will do it later','Yes');
-        if strcmp(cropNow,'Yes')
+        cropNow = questdlg('Is big raw image fully acquired?','','Yes, crop selected ROIs','No, I will do it later','Yes, crop selected ROIs');
+        if strcmp(cropNow,'Yes, crop selected ROIs')
             parfor nROI = 1:size(ROI,1)
                 cropAndSaveStackTif(bigImgPath,ROI(nROI,:),directoryROIs,nROI);
             end
