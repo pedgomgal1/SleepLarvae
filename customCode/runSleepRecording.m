@@ -16,7 +16,6 @@ hourToStartAcquisition = 17; %hour
 minToStartAcquisition = 30; %min
 initClock = clock;
 finalClock = initClock;
-counter=1;
 folder2save=[date '_' num2str(hourToStartAcquisition) '_' num2str(minToStartAcquisition)];
 mkdir(fullfile(rootFolder,folder2save));
 currentClock=clock;
@@ -50,7 +49,12 @@ end
 selectWells = questdlg('Do you want choose all the ROIs per well','Selection','Yes','No','Yes');
 if strcmp(selectWells,'Yes')
     bigImgPath = fullfile(rootFolder,folder2save,'templateImage.tif');
-    imwrite(frame,bigImgPath);
+    if strcmp(splitOrSelectDir,'Yes')
+        frameCropped = imcrop(frame,[ROI(1,[1,3]),ROI(1,2)-ROI(1,1),ROI(1,4)-ROI(1,3)]);
+        imwrite(frameCropped,bigImgPath) ;
+    else
+        imwrite(frame,bigImgPath);
+    end
     directoryROIs = selectIndividualROIs(bigImgPath);
     delete(bigImgPath)
 end
@@ -62,16 +66,22 @@ end
 clockToStartExp = currentClock;
 
 %% Append frame every X seconds
+tiffCounter=0;
 while etime(clock,clockToStartExp) < totalRecordingsSeconds
     currentClock=clock; 
     frame = getsnapshot(v);
     if strcmp(splitOrSelectDir,'Yes')
-        frameCropped = imcrop(frame,[ROI(1,[1,3]),ROI(1,2)-ROI(1,1),ROI(1,4)-ROI(1,3)]);
-        imwrite(frameCropped,fullfile(rootFolder,folder2save,'StackSleep.tif'), 'WriteMode' , 'append') ;
+        frame2save = imcrop(frame,[ROI(1,[1,3]),ROI(1,2)-ROI(1,1),ROI(1,4)-ROI(1,3)]);
     else
-        imwrite(frame,fullfile(rootFolder,folder2save,'StackSleep.tif'), 'WriteMode' , 'append') ;
+        frame2save=frame;
     end
-    counter=counter+1;
+
+    try
+        imwrite(frame2save,fullfile(rootFolder,folder2save,['StackSleep' num2str(tiffCounter) '.tif']), 'WriteMode' , 'append') ;
+    catch
+        tiffCounter = tiffCounter+1;
+        imwrite(frame2save,fullfile(rootFolder,folder2save,['StackSleep' num2str(tiffCounter) '.tif']), 'WriteMode' , 'append') ;
+    end
     pause(acquistionImageTime-etime(clock,currentClock));
 end
 
