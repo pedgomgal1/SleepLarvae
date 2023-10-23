@@ -15,14 +15,16 @@ if strcmp(splitOrSelectDir,'Yes')
     %1.1 Transform individual ROI images in image sequence
     %groupIndividualImages(directoryROIs)
 else
-    directoryROIs = uigetdir('..','Choose directory of ROIs of a specific phenotype');
+    directoryROIs{1} = uigetdir('..','Choose directory of ROIs of a specific phenotype');
 end
 
-groupIndividualImages(directoryROIs)
+% groupIndividualImages(directoryROIs)
 
 %2. Check bouts of individual larvae
 countBouts = questdlg('Do you want to count the bouts per ROI?', '','Yes','No','Yes');
 
 if strcmp(countBouts, 'Yes')
-    countBoutsPerHour(directoryROIs)
+    for nDir = 1:size(directoryROIs,1)
+        countBoutsPerHour(directoryROIs{nDir})
+    end
 end
