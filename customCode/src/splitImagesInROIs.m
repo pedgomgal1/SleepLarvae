@@ -17,7 +17,7 @@ function [directoryROIs,allROIs] = splitImagesInROIs(filePath)
 
         if ~exist(fullfile(path2save,'roiDetails.mat'),'file')
             mkdir(path2save)        
-            Ans = inputdlg({'Enter number of ROI'},'Manual Selection',1,{''});
+            Ans = inputdlg({['Enter number of ROI for ' genotypes{nGen}]},'Manual Selection',1,{''});
             NumROI = str2num(Ans{1});
             ROI = zeros(NumROI,4);
             ROILine =zeros(1,NumROI);
