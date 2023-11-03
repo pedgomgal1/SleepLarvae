@@ -1,9 +1,10 @@
-function directoryROIs = selectIndividualROIs(bigImgPath)
+function directoryROIs = selectIndividualROIs(bigImgPath,genotypes,cropNow)
     ROItoSelect = 'Yes';
     while strcmp(ROItoSelect,'Yes')
-        [directoryROIs,allROIs]=splitImagesInROIs(bigImgPath);
-
-        cropNow = questdlg('Is the big raw image fully acquired?','','Yes, crop selected ROIs','No, I will do it later','Yes, crop selected ROIs');
+        [directoryROIs,allROIs]=splitImagesInROIs(bigImgPath,genotypes);
+        if isempty(cropNow)
+            cropNow = questdlg('Is the big raw image fully acquired?','','Yes, crop selected ROIs','No, I will do it later','Yes, crop selected ROIs');
+        end
         if strcmp(cropNow,'Yes, crop selected ROIs')
 
             dirBigStacks = dir([bigImgPath(1:end-5) '*']);
@@ -46,8 +47,9 @@ function directoryROIs = selectIndividualROIs(bigImgPath)
             end
 
 
-            if size(allROIs,1)  == 3
-                ROItoSelect = 'No, exit selection';
+            if length(genotypes) == 3
+                
+               break;
             else
                 ROItoSelect = questdlg('Do you want to select more ROIs', '','Yes','No, exit selection','Yes');   
             end

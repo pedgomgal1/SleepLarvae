@@ -55,7 +55,7 @@ if strcmp(selectWells,'Yes')
     else
         imwrite(frame,bigImgPath);
     end
-    directoryROIs = selectIndividualROIs(bigImgPath);
+    directoryROIs = selectIndividualROIs(bigImgPath,{'WT','G2019S','A53T'},[]);
     delete(bigImgPath)
 end
 
@@ -85,3 +85,10 @@ while etime(clock,clockToStartExp) < totalRecordingsSeconds
     pause(acquistionImageTime-etime(clock,currentClock));
 end
 
+%% Split ROIs
+directoryROIs = selectIndividualROIs(fullfile(rootFolder,folder2save,'StackSleep0.tif'),{'WT','G2019S','A53T'},'Yes, crop selected ROIs');
+
+%% Run bout extraction
+for nDir = 1:size(directoryROIs,1)
+    countBoutsPerHour(directoryROIs{nDir})
+end

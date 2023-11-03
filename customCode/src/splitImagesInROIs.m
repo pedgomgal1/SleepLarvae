@@ -1,16 +1,20 @@
-function [directoryROIs,allROIs] = splitImagesInROIs(filePath)
+function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes)
 
     addpath(genpath('lib'))
 
-    imgTemplate = imread(filePath);        
-    chosenPhenotype = questdlg('Choose phenotype', '','all genotypes','individual genotype','all genotypes');
+    imgTemplate = imread(filePath);     
     [folderPath,~,~] = fileparts(filePath);
-    if strcmp(chosenPhenotype,'all genotypes')
-        genotypes = {'WT','G2019S','A53T'};
-    else
-        chosenPhenotype = questdlg('Choose phenotype', '','WT','G2019S','A53T','WT');
-        genotypes = {chosenPhenotype};
+
+    if isempty(genotypes)
+        chosenPhenotype = questdlg('Choose phenotype', '','all genotypes','individual genotype','all genotypes');
+        if strcmp(chosenPhenotype,'all genotypes')
+            genotypes = {'WT','G2019S','A53T'};
+        else
+            chosenPhenotype = questdlg('Choose phenotype', '','WT','G2019S','A53T','WT');
+            genotypes = {chosenPhenotype};
+        end
     end
+
     for nGen = 1:length(genotypes)     
         
         path2save=fullfile(folderPath,'Processing',genotypes{nGen});
@@ -47,7 +51,7 @@ function [directoryROIs,allROIs] = splitImagesInROIs(filePath)
             end        
         else
             load(fullfile(path2save,'roiDetails.mat'),'ROI')
-            disp('remove the existing ROIs if you want to select new ones')
+            disp(['remove the existing ROIs from ' genotypes{nGen} ' if you want to select new ones'])
         end
         directoryROIs{nGen,1} = path2save;
         allROIs{nGen,1} = ROI;
