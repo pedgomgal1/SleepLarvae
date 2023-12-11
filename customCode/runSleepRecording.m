@@ -20,6 +20,9 @@ folder2save=[date '_' num2str(hourToStartAcquisition) '_' num2str(minToStartAcqu
 mkdir(fullfile(rootFolder,folder2save));
 currentClock=clock;
 
+rangeWellRadii = [70 90]; % [minRadius, maxRadius] in pixels
+wellPaddingROI = 10; % ROI side = 2*(radius + padding) in pixels
+
 %% Cropping the init frame
 splitOrSelectDir = questdlg('Do you want to crop the frame?','Selection','Yes','No','Yes');
 
@@ -55,7 +58,7 @@ if strcmp(selectWells,'Yes')
     else
         imwrite(frame,bigImgPath);
     end
-    directoryROIs = selectIndividualROIs(bigImgPath,{'WT','G2019S','A53T'},[]);
+    directoryROIs = selectIndividualROIs(bigImgPath,{'WT','G2019S','A53T'},[],rangeWellRadii,wellPaddingROI);
     delete(bigImgPath)
 end
 
@@ -86,9 +89,9 @@ while etime(clock,clockToStartExp) < totalRecordingsSeconds
 end
 
 %% Split ROIs
-directoryROIs = selectIndividualROIs(fullfile(rootFolder,folder2save,'StackSleep0.tif'),{'WT','G2019S','A53T'},'Yes, crop selected ROIs');
+directoryROIs = selectIndividualROIs(fullfile(rootFolder,folder2save,'StackSleep0.tif'),{'WT','G2019S','A53T'},'Yes, crop selected ROIs',rangeWellRadii,wellPaddingROI);
 
 %% Run bout extraction
 for nDir = 1:size(directoryROIs,1)
-    countBoutsPerHour(directoryROIs{nDir})
+    countBoutsPerHour(directoryROIs{nDir},rangeWellRadii)
 end

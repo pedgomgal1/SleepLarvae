@@ -1,4 +1,4 @@
-function countBoutsPerHour(directoryROIs)
+function countBoutsPerHour(directoryROIs,rangeWellRadii)
     
     thresholdDiffPixelsValue = 10;
     maxLarvaArea = 200; %no larva area larger than 200 pixels
@@ -14,7 +14,7 @@ function countBoutsPerHour(directoryROIs)
         warning('off')   
         disp(['Running analysis: ' pathROI_tif])
         if ~exist(fullfile(folderROIdir(nROIFolders).folder,'boutsData','boutsPerHour.mat'),'file')
-          saveLarvaMovement(pathROI_tif,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,pixels2CheckFromCentroid,nImagesPerHour);
+          saveLarvaMovement(pathROI_tif,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii);
         end
     end
 end

@@ -1,7 +1,7 @@
-function directoryROIs = selectIndividualROIs(bigImgPath,genotypes,cropNow)
+function directoryROIs = selectIndividualROIs(bigImgPath,genotypes,cropNow,rangeWellRadii,wellPaddingROI)
     ROItoSelect = 'Yes';
     while strcmp(ROItoSelect,'Yes')
-        [directoryROIs,allROIs]=splitImagesInROIs(bigImgPath,genotypes);
+        [directoryROIs,allROIs]=splitImagesInROIs(bigImgPath,genotypes,rangeWellRadii,wellPaddingROI);
         if isempty(cropNow)
             cropNow = questdlg('Is the video fully acquired?','','Yes, crop selected ROIs','No, I will do it later','Yes, crop selected ROIs');
         end

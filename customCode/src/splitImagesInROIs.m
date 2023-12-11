@@ -1,4 +1,4 @@
-function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes)
+function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes,rangeWellRadii,wellPaddingROI)
 
     addpath(genpath('lib'))
 
@@ -15,31 +15,19 @@ function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes)
         end
     end
 
-    [centers,radii] = imfindcircles(imgTemplate,[75,90],'ObjectPolarity','dark','Sensitivity',0.975);
-    [centers,indx]=sortrows(centers);
-    radii=radii(indx);
-    imshow(imgTemplate); hold on; viscircles(centers, radii,'EdgeColor','b');
-    numROIs=length(radii);
+    [centerROIs,radiiWells] = imfindcircles(imgTemplate,rangeWellRadii,'ObjectPolarity','dark','Sensitivity',0.975);
+    [centerROIs,indx]=sortrows(centerROIs);
+    radiiWells=radiiWells(indx);
+    imshow(imgTemplate); hold on; viscircles(centerROIs, radiiWells,'EdgeColor','b');
+    numROIs=length(radiiWells);
     %Label the ROI with its number inside the circle
     for n=1:numROIs
-       text(centers(n,1), centers(n,2), num2str(n), 'Color', 'black', 'FontSize', 12, 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+       text(centerROIs(n,1), centerROIs(n,2), num2str(n), 'Color', 'black', 'FontSize', 12, 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
     end
-
-% % Interactive selection using ginput
-% padding=10; % # pixels as padding
-% listROI=[];
-% for n = 1:numROIs
-%     title(['Selected ROIs for ' genotypes{nGen} ': ' num2str(listROI)])
-%     [x, y] = ginput(1); % Wait for user input by clicking on a circle
-%     idx = knnsearch(centers, [x, y]); % Find the nearest circle
-%     %if the roi is in the list double to delete
-%     listROI=[listROI, idx];
-%     ROI(n,:)=[centers(idx,1)-radii(idx)-padding,centers(idx,1)+radii(idx)+padding,centers(idx,2)-radii(idx)-padding,centers(idx,2)+radii(idx)+padding];
-%     ROILine(n) = plot([ROI(n,1) ROI(n,2) ROI(n,2) ROI(n,1) ROI(n,1)], ...
-%                     [ROI(n,3) ROI(n,3) ROI(n,4) ROI(n,4) ROI(n,3)]);
-%     title(['Selected ROIs for ' genotypes{nGen} ': ' num2str(listROI)])
-% end
-
+    
+    roiSelectionMode = questdlg('Selection of ROI mode', '','interactive','manual','interactive');
+    
+    
     for nGen = 1:length(genotypes)     
         
         path2save=fullfile(folderPath,'Processing',genotypes{nGen});
@@ -48,35 +36,86 @@ function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes)
             mkdir(path2save)        
             Ans = inputdlg({['Enter number of ROI for ' genotypes{nGen}]},'Manual Selection',1,{''});
             numROIs = str2num(Ans{1});
-            ROI = zeros(numROIs,4);
             ROILine =zeros(1,numROIs);
             ROILabel =zeros(1,numROIs);
-            fig1 = imshow(imgTemplate);
-            hold on
-            for n = 1:numROIs
-                title(['Select ROI#' ...
-                    num2str(n) ': Click at UPPER-LEFT corner, then at LOWER-RIGHT corner.'])
-                [ROI(n,1), ROI(n,3)] = ginput(1);
-                p(1) = plot([ROI(n,1) ROI(n,1)], [1 size(imgTemplate,1)], '-r');
-                p(2) = plot([1 size(imgTemplate,2)], [ROI(n,3) ROI(n,3)], '-r');
-                [ROI(n,2), ROI(n,4)] = ginput(1);
-                set(p(:),'Visible','off');
-                ROILine(n) = plot([ROI(n,1) ROI(n,2) ROI(n,2) ROI(n,1) ROI(n,1)], ...
-                    [ROI(n,3) ROI(n,3) ROI(n,4) ROI(n,4) ROI(n,3)]);
-                ROILabel(n) = text(ROI(n,1)+10,ROI(n,3)+20,num2str(n),'Color','white','FontSize',10);
-            end
-            ROI = round(ROI);
             
+            if strcmp(roiSelectionMode,'interactive')
+                padding=wellPaddingROI; % # pixels as padding
+                listROI=[];
+                ROI=[];
+                close all
+                imshow(imgTemplate); hold on; viscircles(centerROIs, radiiWells,'EdgeColor','b');
+                while length(listROI)<numROIs
+                    % Interactive selection using ginput
+                    title(['Selected ROIs for ' genotypes{nGen} ': ' num2str(listROI) ' -- Double selection to remove ROI'])
+                    [x, y] = ginput(1); % Wait for user input by clicking on a circle
+                    idx = knnsearch(centerROIs, [x, y]); % Find the nearest circle
+                    newROI = [centerROIs(idx,1)-radiiWells(idx)-padding,centerROIs(idx,1)+radiiWells(idx)+padding,centerROIs(idx,2)-radiiWells(idx)-padding,centerROIs(idx,2)+radiiWells(idx)+padding];
+                    %if the roi is in the list double to delete
+                    if ismember(idx, listROI)
+                        listROI(listROI==idx)=[];
+                        ROI(ismember(newROI,ROI,'rows'),:)=[];
+                        close all
+                        imshow(imgTemplate); hold on; viscircles(centerROIs, radiiWells,'EdgeColor','b');
+                    else
+                        listROI=[listROI, idx];
+                        ROI=[ROI;newROI];
+                    end
+                    for nROI=1:length(listROI)
+                        ROILine(nROI) = plot([ROI(nROI,1) ROI(nROI,2) ROI(nROI,2) ROI(nROI,1) ROI(nROI,1)],[ROI(nROI,3) ROI(nROI,3) ROI(nROI,4) ROI(nROI,4) ROI(nROI,3)]);
+                        text(centerROIs(listROI(nROI),1), centerROIs(listROI(nROI),2), num2str(nROI), 'Color', 'black', 'FontSize', 12, 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+                    end
+                    title(['Selected ROIs for ' genotypes{nGen} ': ' num2str(listROI) ])    
+                end
+            else
+                close all;
+                imshow(imgTemplate);hold on;
+                ROI = zeros(numROIs,4);
+                for n = 1:numROIs
+                    %Manual selection
+                    title(['Select ROI#' ...
+                        num2str(n) ': Click at UPPER-LEFT corner, then at LOWER-RIGHT corner.'])
+                    [ROI(n,1), ROI(n,3)] = ginput(1);
+                    p(1) = plot([ROI(n,1) ROI(n,1)], [1 size(imgTemplate,1)], '-r');
+                    p(2) = plot([1 size(imgTemplate,2)], [ROI(n,3) ROI(n,3)], '-r');
+                    [ROI(n,2), ROI(n,4)] = ginput(1);
+                    set(p(:),'Visible','off');
+                    ROILine(n) = plot([ROI(n,1) ROI(n,2) ROI(n,2) ROI(n,1) ROI(n,1)], ...
+                        [ROI(n,3) ROI(n,3) ROI(n,4) ROI(n,4) ROI(n,3)]);
+                    ROILabel(n) = text(ROI(n,1)+10,ROI(n,3)+20,num2str(n),'Color','white','FontSize',10);
+                end
+            end
+            
+            %adjust ROI to the image limits
+            ROI = round(ROI);
+            [maxRow,maxCol]=size(imgTemplate);
+            ROI(ROI<1)=1;
+            idxMaxCol = [ROI(:,[1,2])>maxCol,false(size(ROI(:,[3,4])))];
+            ROI(idxMaxCol)=maxCol;
+            idxMaxRow = [false(size(ROI(:,[1,2]))),ROI(:,[3,4])>maxRow];
+            ROI(idxMaxRow)=maxRow;
+%             close all;
+%             imshow(imgTemplate); hold on;
+%             for nROI=1:length(listROI)
+%                 ROILine(nROI) = plot([ROI(nROI,1) ROI(nROI,2) ROI(nROI,2) ROI(nROI,1) ROI(nROI,1)],[ROI(nROI,3) ROI(nROI,3) ROI(nROI,4) ROI(nROI,4) ROI(nROI,3)]);
+%                 text(centerROIs(listROI(nROI),1), centerROIs(listROI(nROI),2), num2str(nROI), 'Color', 'black', 'FontSize', 12, 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+%             end
+
             rightROI = questdlg('Right ROI selection?', '','Yes','No','Yes');
-            close all
+            
             if strcmp(rightROI,'Yes')
-                save(fullfile(path2save,'roiDetails.mat'),'ROI','ROILine')
+                f = gcf;
+                exportgraphics(f,fullfile(path2save,[genotypes{nGen} '_ROIs.png']),'Resolution',300)
+                save(fullfile(path2save,'roiDetails.mat'),'ROI')
+                close all
             else 
+                close all
                 return;
-            end        
+            end 
+                     
         else
             load(fullfile(path2save,'roiDetails.mat'),'ROI')
-            disp(['remove the existing ROIs from ' genotypes{nGen} ' if you want to select new ones'])
+            disp(['remove the existing ROIs from ' genotypes{nGen} ' to select new ones'])
         end
         directoryROIs{nGen,1} = path2save;
         allROIs{nGen,1} = ROI;

@@ -1,4 +1,4 @@
-function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,pixels2CheckFromCentroid,nImagesPerHour)
+function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii)
 
         % Extract the folder path from the input file name
         [folderPath, ~, ~] = fileparts(fileName);
@@ -9,9 +9,25 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
         % Detect initial background to be subtracted
         imageBackground = detectBackground(fileName, 1:nImagesPerHour);
         
+        [centerROIs,radiiWells,metric] = imfindcircles(imageBackground,rangeWellRadii,'ObjectPolarity','dark','Sensitivity',0.99);
+        imshow(imageBackground); hold on; viscircles(centerROIs(1,:), radiiWells(1),'EdgeColor','b');
+
+        %Crop just circle:
+        imageSize = size(imageBackground);
+        paddingCircle=2; %extra radius
+        ci = [centerROIs(1,:), radiiWells(1)+paddingCircle];     % center and radius of circle ([c_row, c_col, r])
+        [xx,yy] = ndgrid((1:imageSize(1))-ci(1),(1:imageSize(2))-ci(2));
+        maskCircle = uint8((xx.^2 + yy.^2)<ci(3)^2);
+        croppedBackGround = uint8(zeros(size(imageBackground)));
+        croppedBackGround = imageBackground.*maskCircle;
+
+
+        %%Identify larva in the first frame after tracking larva movement
+        %%from the end to the beggining of the experiment
+
         % Initialize variables for larva tracking
-        larva1 = abs(imageBackground - imread(fileName, 1)) > thresholdDiffPixelsValue;
-        larva2 = abs(imageBackground - imread(fileName, 2)) > thresholdDiffPixelsValue;
+        larva1 = abs(croppedBackGround - imread(fileName, 1).*maskCircle) > thresholdDiffPixelsValue;
+        larva2 = abs(croppedBackGround - imread(fileName, 2).*maskCircle) > thresholdDiffPixelsValue;
         % Use bwareafilt to keep objects within the specified area range
         larva1 = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
         larva2 = bwareafilt(larva2, [minLarvaArea,maxLarvaArea]);
@@ -48,12 +64,12 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
             for nTempImg = 1:size(infoImage,1)-1
                 
                 % Read two consecutive frames
-                img1 = imread(fileName, nTempImg);
-                img2 = imread(fileName, nTempImg + 1);
+                img1 = imread(fileName, nTempImg).*maskCircle;
+                img2 = imread(fileName, nTempImg + 1).*maskCircle;
                 
                 % Update the background and centroid every hour
                 if mod(nTempImg, nImagesPerHour) == 0 && (nTempImg + nImagesPerHour) < size(infoImage, 1)
-                    imageBackground = detectBackground(fileName, nTempImg:nTempImg + nImagesPerHour);
+                    imageBackground = detectBackground(fileName, nTempImg:nTempImg + nImagesPerHour).*maskCircle;
                     larva1 = abs(imageBackground - img1) > thresholdDiffPixelsValue;
                     larvaFilt = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
                     centroid2Check = struct2array(regionprops(bwareafilt(larvaFilt,1), 'Centroid'));
@@ -68,9 +84,9 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
                 catch
                     try
                         if nTempImg > nImagesPerHour / 2
-                            imageBackground = detectBackground(fileName, (nTempImg - round(nImagesPerHour / 2)):(nTempImg + round(nImagesPerHour / 2)));
+                            imageBackground = detectBackground(fileName, (nTempImg - round(nImagesPerHour / 2)):(nTempImg + round(nImagesPerHour / 2))).*maskCircle;
                         else
-                            imageBackground = detectBackground(fileName, 1:nTempImg + round(nImagesPerHour / 2));
+                            imageBackground = detectBackground(fileName, 1:nTempImg + round(nImagesPerHour / 2)).*maskCircle;
                         end
                         larva1 = abs(imageBackground - img1) > thresholdDiffPixelsValue;
                         larvaFilt = bwareafilt(larva1, 1);
