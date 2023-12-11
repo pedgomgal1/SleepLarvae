@@ -2,7 +2,7 @@
 % This example uses PARFEVAL (Parallel Computing Toolbox) to save acquired 
 % images to TIFF files.
 
-rootFolder = 'C:\Users\TEM\Documents\Pedro\Sleep';
+rootFolder = 'C:\Users\TEM\Documents\Pedro\Sleep\tshG80thG4';
 mkdir(rootFolder)
 addpath(genpath('src'))
 addpath(genpath('lib'))

@@ -9,8 +9,8 @@ rootDirectory = uigetdir('..','Choose root directory');
 
 alldirs=cell(size(allGenotypes));
 
-allAverageBouts = zeros(12,length(allGenotypes));
-allVarBouts = zeros(12,length(allGenotypes));
+allAverageBouts = zeros(6,length(allGenotypes));
+allVarBouts = zeros(6,length(allGenotypes));
 h = figure('units','normalized','outerposition',[0 0 1 1],'Visible','on');
 hold on;
 
@@ -36,7 +36,7 @@ for nGen = 1:length(allGenotypes)
     averBouts = mean(percBoutsPerHour,2);
 
     allPercBouts{nGen} = percBoutsPerHour(:);
-    arrayNames = arrayfun(@(x) [allGenotypes{nGen} '_' num2str(x) 'h'],1:12,'UniformOutput',false);
+    arrayNames = arrayfun(@(x) [allGenotypes{nGen} '_' num2str(x) 'h'],1:6,'UniformOutput',false);
     namesRep = repmat(arrayNames',size(percBoutsPerHour,2),1);
     allNames{nGen} = namesRep;
 

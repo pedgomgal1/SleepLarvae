@@ -108,6 +108,11 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
                         % Exit loop if too many exceptions occur
                         if counterNan == 100
                             disp(['Too many NaN in: ' folderPath])
+                            try 
+                                rmdir(folderPath,'s');
+                            catch
+
+                            end
                             break;
                         end
                     end
