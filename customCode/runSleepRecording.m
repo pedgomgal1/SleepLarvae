@@ -20,7 +20,7 @@ folder2save=[date '_' num2str(hourToStartAcquisition) '_' num2str(minToStartAcqu
 mkdir(fullfile(rootFolder,folder2save));
 currentClock=clock;
 
-rangeWellRadii = [70 90]; % [minRadius, maxRadius] in pixels
+rangeWellRadii = [75 85]; % [minRadius, maxRadius] in pixels
 wellPaddingROI = 10; % ROI side = 2*(radius + padding) in pixels
 
 %% Cropping the init frame

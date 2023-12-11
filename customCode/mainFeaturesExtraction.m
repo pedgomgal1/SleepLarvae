@@ -4,8 +4,9 @@ warning 'off'
 
 %1. Split original images in individual wells per genotype
 addpath(genpath('src'))
+addpath(genpath('lib'))
 
-rangeWellRadii = [70 90]; % [minRadius, maxRadius] of wells in pixels
+rangeWellRadii = [75 85]; % [minRadius, maxRadius] of wells in pixels
 
 splitOrSelectDir = questdlg('Do you want to split original images into individual wells', '','Yes','No, select individual wells directory','Yes');
 
