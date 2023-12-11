@@ -15,7 +15,12 @@ function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes,rangeWel
         end
     end
 
-    [centerROIs,radiiWells] = imfindcircles(imgTemplate,rangeWellRadii,'ObjectPolarity','dark','Sensitivity',0.975);
+    [centerROIs,radiiWells,metrics] = imfindcircles(imgTemplate,rangeWellRadii,'Sensitivity',0.99);
+    
+    Ans = inputdlg({'Enter total number of wells'},'Manual Selection',1,{''});
+    totalNumberWells =  str2num(Ans{1});
+    centerROIs=centerROIs(1:totalNumberWells,:);
+    radiiWells=radiiWells(1:totalNumberWells);
     [centerROIs,indx]=sortrows(centerROIs);
     radiiWells=radiiWells(indx);
     imshow(imgTemplate); hold on; viscircles(centerROIs, radiiWells,'EdgeColor','b');
@@ -47,14 +52,14 @@ function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes,rangeWel
                 imshow(imgTemplate); hold on; viscircles(centerROIs, radiiWells,'EdgeColor','b');
                 while length(listROI)<numROIs
                     % Interactive selection using ginput
-                    title(['Selected ROIs for ' genotypes{nGen} ': ' num2str(listROI) ' -- Double selection to remove ROI'])
+                    title(['Selected ROIs for ' genotypes{nGen}  ' -- Double selection to remove ROI'])
                     [x, y] = ginput(1); % Wait for user input by clicking on a circle
                     idx = knnsearch(centerROIs, [x, y]); % Find the nearest circle
                     newROI = [centerROIs(idx,1)-radiiWells(idx)-padding,centerROIs(idx,1)+radiiWells(idx)+padding,centerROIs(idx,2)-radiiWells(idx)-padding,centerROIs(idx,2)+radiiWells(idx)+padding];
                     %if the roi is in the list double to delete
                     if ismember(idx, listROI)
                         listROI(listROI==idx)=[];
-                        ROI(ismember(newROI,ROI,'rows'),:)=[];
+                        ROI(ismember(ROI,newROI,'rows'),:)=[];
                         close all
                         imshow(imgTemplate); hold on; viscircles(centerROIs, radiiWells,'EdgeColor','b');
                     else
@@ -65,7 +70,7 @@ function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes,rangeWel
                         ROILine(nROI) = plot([ROI(nROI,1) ROI(nROI,2) ROI(nROI,2) ROI(nROI,1) ROI(nROI,1)],[ROI(nROI,3) ROI(nROI,3) ROI(nROI,4) ROI(nROI,4) ROI(nROI,3)]);
                         text(centerROIs(listROI(nROI),1), centerROIs(listROI(nROI),2), num2str(nROI), 'Color', 'black', 'FontSize', 12, 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
                     end
-                    title(['Selected ROIs for ' genotypes{nGen} ': ' num2str(listROI) ])    
+                    title(['Selected ROIs for ' genotypes{nGen}  ' -- Double selection to remove ROI'])
                 end
             else
                 close all;
