@@ -46,7 +46,7 @@ if strcmp(splitOrSelectDir,'Yes')
 end
 
 %% Create ROIs of individual wells
-selectWells = questdlg('Do you want choose all the ROIs per well','Selection','Yes','No','Yes');
+selectWells = questdlg('Do you want to select all the individual ROIs?','Selection','Yes','No','Yes');
 if strcmp(selectWells,'Yes')
     bigImgPath = fullfile(rootFolder,folder2save,'templateImage.tif');
     if strcmp(splitOrSelectDir,'Yes')
