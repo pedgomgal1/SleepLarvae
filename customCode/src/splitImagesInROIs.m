@@ -1,4 +1,4 @@
-function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes,rangeWellRadii,wellPaddingROI)
+function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes,rangeWellRadii,wellPaddingROI,ROISelection)
 
     addpath(genpath('lib'))
 
@@ -15,23 +15,24 @@ function [directoryROIs,allROIs] = splitImagesInROIs(filePath,genotypes,rangeWel
         end
     end
 
-    [centerROIs,radiiWells,metrics] = imfindcircles(imgTemplate,rangeWellRadii,'Sensitivity',0.99);
-    
-    Ans = inputdlg({'Enter total number of wells'},'Manual Selection',1,{''});
-    totalNumberWells =  str2num(Ans{1});
-    centerROIs=centerROIs(1:totalNumberWells,:);
-    radiiWells=radiiWells(1:totalNumberWells);
-    [centerROIs,indx]=sortrows(centerROIs);
-    radiiWells=radiiWells(indx);
-    imshow(imgTemplate); hold on; viscircles(centerROIs, radiiWells,'EdgeColor','b');
-    numROIs=length(radiiWells);
-    %Label the ROI with its number inside the circle
-    for n=1:numROIs
-       text(centerROIs(n,1), centerROIs(n,2), num2str(n), 'Color', 'black', 'FontSize', 12, 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+    if ROISelection
+        Ans = inputdlg({'Enter total number of wells'},'Manual Selection',1,{''});
+        totalNumberWells =  str2num(Ans{1});
+        
+        [centerROIs,radiiWells,metrics] = imfindcircles(imgTemplate,rangeWellRadii,'Sensitivity',0.99);
+        centerROIs=centerROIs(1:totalNumberWells,:);
+        radiiWells=radiiWells(1:totalNumberWells);
+        [centerROIs,indx]=sortrows(centerROIs);
+        radiiWells=radiiWells(indx);
+        imshow(imgTemplate); hold on; viscircles(centerROIs, radiiWells,'EdgeColor','b');
+        numROIs=length(radiiWells);
+        %Label the ROI with its number inside the circle
+        for n=1:numROIs
+           text(centerROIs(n,1), centerROIs(n,2), num2str(n), 'Color', 'black', 'FontSize', 12, 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+        end
+        
+        roiSelectionMode = questdlg('Selection of ROI mode', '','interactive','manual','interactive');
     end
-    
-    roiSelectionMode = questdlg('Selection of ROI mode', '','interactive','manual','interactive');
-    
     
     for nGen = 1:length(genotypes)     
         

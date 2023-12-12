@@ -58,7 +58,8 @@ if strcmp(selectWells,'Yes')
     else
         imwrite(frame,bigImgPath);
     end
-    directoryROIs = selectIndividualROIs(bigImgPath,{'WT','G2019S','A53T'},[],rangeWellRadii,wellPaddingROI);
+    ROISelection=true;
+    directoryROIs = selectIndividualROIs(bigImgPath,{'WT','G2019S','A53T'},[],rangeWellRadii,wellPaddingROI,ROISelection);
     delete(bigImgPath)
 end
 
@@ -89,7 +90,8 @@ while etime(clock,clockToStartExp) < totalRecordingsSeconds
 end
 
 %% Split ROIs
-directoryROIs = selectIndividualROIs(fullfile(rootFolder,folder2save,'StackSleep0.tif'),{'WT','G2019S','A53T'},'Yes, crop selected ROIs',rangeWellRadii,wellPaddingROI);
+ROISelection=false;
+directoryROIs = selectIndividualROIs(fullfile(rootFolder,folder2save,'StackSleep0.tif'),{'WT','G2019S','A53T'},'Yes, crop selected ROIs',rangeWellRadii,wellPaddingROI,ROISelection);
 
 %% Run bout extraction
 for nDir = 1:size(directoryROIs,1)

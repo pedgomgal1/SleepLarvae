@@ -14,7 +14,8 @@ if strcmp(splitOrSelectDir,'Yes')
     [fileName, filePath] = uigetfile('*.tif', 'Select template file to CHOOSE or LOAD the ROIs per genotype');
     bigImagePath = fullfile(filePath,fileName);
     
-    directoryROIs=selectIndividualROIs(bigImagePath,[],[],rangeWellRadii);
+    ROISelection=true;
+    directoryROIs=selectIndividualROIs(bigImagePath,[],[],rangeWellRadii,ROISelection);
     %1.1 Transform individual ROI images in image sequence
     %groupIndividualImages(directoryROIs)
 else
