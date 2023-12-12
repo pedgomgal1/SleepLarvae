@@ -94,6 +94,7 @@ ROISelection=false;
 directoryROIs = selectIndividualROIs(fullfile(rootFolder,folder2save,'StackSleep0.tif'),{'WT','G2019S','A53T'},'Yes, crop selected ROIs',rangeWellRadii,wellPaddingROI,ROISelection);
 
 %% Run bout extraction
+frameToStartLarvaSearching = 1000;
 for nDir = 1:size(directoryROIs,1)
-    countBoutsPerHour(directoryROIs{nDir},rangeWellRadii)
+    countBoutsPerHour(directoryROIs{nDir},rangeWellRadii,frameToStartLarvaSearching)
 end

@@ -7,6 +7,7 @@ addpath(genpath('src'))
 addpath(genpath('lib'))
 
 rangeWellRadii = [75 85]; % [minRadius, maxRadius] of wells in pixels
+frameToStartLarvaSearching = 1000;
 
 splitOrSelectDir = questdlg('Do you want to split original images into individual wells', '','Yes','No, select individual wells directory','Yes');
 
@@ -29,6 +30,6 @@ countBouts = questdlg('Do you want to count the bouts per ROI?', '','Yes','No','
 
 if strcmp(countBouts, 'Yes')
     for nDir = 1:size(directoryROIs,1)
-        countBoutsPerHour(directoryROIs{nDir},rangeWellRadii)
+        countBoutsPerHour(directoryROIs{nDir},rangeWellRadii,frameToStartLarvaSearching)
     end
 end

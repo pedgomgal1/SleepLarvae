@@ -38,7 +38,11 @@ function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,f
             larva2 = bwareafilt(larva2, [minLarvaArea,maxLarvaArea]);
             larva1 = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
     
-            [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(imgEnd, imgPrevious, croppedBackGround, thresholdDiffPixelsValue, numberOfPixelsThreshold, pixels2CheckFromCentroid, centroid2Check, larvaFilt,minLarvaArea,maxLarvaArea);
+            try
+                [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(imgEnd, imgPrevious, croppedBackGround, thresholdDiffPixelsValue, numberOfPixelsThreshold, pixels2CheckFromCentroid, centroid2Check, larvaFilt,minLarvaArea,maxLarvaArea);
+            catch
+                
+            end
         end
     else
         print('Larva not found - trying conventional mode')

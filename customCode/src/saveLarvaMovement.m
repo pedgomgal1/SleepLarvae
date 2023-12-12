@@ -1,4 +1,4 @@
-function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii)
+function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii,frameToStartLarvaSearching)
 
         % Extract the folder path from the input file name
         [folderPath, ~, ~] = fileparts(fileName);
@@ -21,8 +21,7 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
 
         %%Identify larva in the first frame after tracking larva movement
         %%From the end to the beggining of the experiment
-        lastFrame=nImagesPerHour; % tracking larva all the way back from the end to the beginning
-        [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,fileName,lastFrame,maskCircle,thresholdDiffPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,minLarvaArea,maxLarvaArea);
+        [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,fileName,frameToStartLarvaSearching,maskCircle,thresholdDiffPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,minLarvaArea,maxLarvaArea);
 
 %         imshow([croppedBackGround,uint8(larvaFilt)*255,imread(fileName, 1).*maskCircle])
         
