@@ -1,4 +1,4 @@
-function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii,frameToStartLarvaSearching)
+function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,maxMajorAxisLength,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii,frameToStartLarvaSearching)
 
         % Extract the folder path from the input file name
         [folderPath, ~, ~] = fileparts(fileName);
@@ -12,7 +12,7 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
         [centerROIs,radiiWells,metric] = imfindcircles(imageBackground,rangeWellRadii,'Sensitivity',0.99);
         figure('Visible','off')
         imshow(imageBackground); hold on; viscircles(centerROIs(1,:), radiiWells(1),'EdgeColor','b');
-        paddingCircle=5; %extra radius
+        paddingCircle=3; %extra radius
         circ = drawcircle('Center',centerROIs(1,:),'Radius',radiiWells(1)+paddingCircle);
         maskCircle = uint8(createMask(circ));
         close all;
@@ -21,8 +21,7 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
 
         %%Identify larva in the first frame after tracking larva movement
         %%From the end to the beggining of the experiment
-        [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,fileName,frameToStartLarvaSearching,maskCircle,thresholdDiffPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,minLarvaArea,maxLarvaArea);
-
+        [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,fileName,frameToStartLarvaSearching,maskCircle,thresholdDiffPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,minLarvaArea,maxLarvaArea,maxMajorAxisLength);
 %         imshow([croppedBackGround,uint8(larvaFilt)*255,imread(fileName, 1).*maskCircle])
         
         % Initialize arrays to store tracking data
@@ -52,12 +51,13 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
                     imageBackground = detectBackground(fileName, nTempImg:nTempImg + nImagesPerHour).*maskCircle;
                     larva1 = abs(imageBackground - img1) > thresholdDiffPixelsValue;
                     larvaFilt = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
+                    larvaFilt = bwpropfilt(larvaFilt,'MajorAxisLength',[0 maxMajorAxisLength]);
                     centroid2Check = struct2array(regionprops(bwareafilt(larvaFilt,1), 'Centroid'));
                 end
     
                 try
                      % Check if larva is moving
-                    [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(img1, img2, imageBackground, thresholdDiffPixelsValue, numberOfPixelsThreshold, pixels2CheckFromCentroid, centroid2Check, larvaFilt,minLarvaArea,maxLarvaArea);
+                    [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(img1, img2, imageBackground, thresholdDiffPixelsValue, numberOfPixelsThreshold, pixels2CheckFromCentroid, centroid2Check, larvaFilt,minLarvaArea,maxLarvaArea,maxMajorAxisLength);
                     
                     % Save the filtered larva image with additional information
                     imwrite(larvaFilt, fullfile(folderPath, 'binaryLarva', [num2str(nTempImg + 1) '_' num2str(nPixels) 'px.jpg']))
@@ -75,7 +75,7 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
                         if sum(centroid2Check) == 0
                             centroid2Check = struct2array(regionprops(larvaFilt, 'Centroid'));
                         end
-                        [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(img1, img2, imageBackground, thresholdDiffPixelsValue, numberOfPixelsThreshold, pixels2CheckFromCentroid, centroid2Check, larvaFilt,minLarvaArea,maxLarvaArea);
+                        [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(img1, img2, imageBackground, thresholdDiffPixelsValue, numberOfPixelsThreshold, pixels2CheckFromCentroid, centroid2Check, larvaFilt,minLarvaArea,maxLarvaArea,maxMajorAxisLength);
                         
                         % Save the filtered larva image with additional information
                         imwrite(larvaFilt, fullfile(folderPath, 'binaryLarva', [num2str(nTempImg + 1) '_' num2str(nPixels) 'px.jpg']))

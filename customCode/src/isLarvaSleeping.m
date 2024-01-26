@@ -1,4 +1,4 @@
-function [boolMovement,restImageFinal,nPixels,Centroid2Check,larvaFilt] = isLarvaSleeping(imageROI1, imageROI2,imageBackground,thresholdPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,CentroidPrevious,larvaFiltPrevious,minLarvaArea,maxLarvaArea)
+function [boolMovement,restImageFinal,nPixels,Centroid2Check,larvaFilt] = isLarvaSleeping(imageROI1, imageROI2,imageBackground,thresholdPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,CentroidPrevious,larvaFiltPrevious,minLarvaArea,maxLarvaArea,maxMajorAxisLength)
     
     % Create a disk mask seeding in the larvaFilt centroid
     maskCentroid=false(size(imageROI1));
@@ -20,6 +20,8 @@ function [boolMovement,restImageFinal,nPixels,Centroid2Check,larvaFilt] = isLarv
 
     % filter larva body of frame 2, and keep the centroid if no other centroid can be captured from restImageFinal or restCombined
     larvaFilt = bwareafilt((imageROI2minusBG>thresholdPixelsValue)>0 & dilatedCentroidPrevious,[minLarvaArea,maxLarvaArea]);
+    larvaFilt = bwpropfilt(larvaFilt,'MajorAxisLength',[0 maxMajorAxisLength]);
+
     Centroid2Check=struct2array(regionprops(bwareafilt(larvaFilt,1),'Centroid'));
     [y,x]=find(restImageFinal);
     if ~isempty(x)
@@ -31,13 +33,16 @@ function [boolMovement,restImageFinal,nPixels,Centroid2Check,larvaFilt] = isLarv
         labels=labelLarva(restImage21);
         selectedBlobLarva = (labelLarva == mode(labels(labels>0)));
         larvaFilt = bwareafilt(selectedBlobLarva & dilatedCentroid,[minLarvaArea,maxLarvaArea]);
+        larvaFilt = bwpropfilt(larvaFilt,'MajorAxisLength',[0 maxMajorAxisLength]);
         larvaFilt = bwareafilt(larvaFilt,1);
         if ~any(larvaFilt(:)>0)
             %Larva intersection
-            larvaFilt = bwareafilt(bwareafilt(intersectLarv,[minLarvaArea,maxLarvaArea]),1);
+            larvaFilt = bwpropfilt(intersectLarv,'MajorAxisLength',[0 maxMajorAxisLength]);
+            larvaFilt = bwareafilt(bwareafilt(larvaFilt,[minLarvaArea,maxLarvaArea]),1);
         end
     else
-        larvaFilt = bwareafilt(bwareafilt(intersectLarv,[minLarvaArea,maxLarvaArea]),1);
+        larvaFilt = bwpropfilt(intersectLarv,'MajorAxisLength',[0 maxMajorAxisLength]);
+        larvaFilt = bwareafilt(bwareafilt(larvaFilt,[minLarvaArea,maxLarvaArea]),1);
         if any(larvaFilt(:)>0)
             [y,x]=find(larvaFilt);
             Centroid2Check = [round(mean(x)),round(mean(y))];
@@ -51,7 +56,8 @@ function [boolMovement,restImageFinal,nPixels,Centroid2Check,larvaFilt] = isLarv
 
     if  ~any(sum((dilatedCentroidPrevious & dilatedCentroid)>0))
         dilatedCentroid=dilatedCentroidPrevious;
-        larvaFilt = bwareafilt(bwareafilt((imageROI2minusBG>thresholdPixelsValue)>0 & dilatedCentroid,[minLarvaArea,maxLarvaArea]),1);
+        larvaFilt = bwpropfilt((imageROI2minusBG>thresholdPixelsValue)>0 & dilatedCentroid,'MajorAxisLength',[0 maxMajorAxisLength]);
+        larvaFilt = bwareafilt(bwareafilt(larvaFilt,[minLarvaArea,maxLarvaArea]),1);
         Centroid2Check=struct2array(regionprops(larvaFilt,'Centroid'));
         if isempty(Centroid2Check)
             Centroid2Check=CentroidPrevious;

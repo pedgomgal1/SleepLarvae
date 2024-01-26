@@ -1,4 +1,4 @@
-function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,fileName,lastFrame,maskCircle,thresholdDiffPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,minLarvaArea,maxLarvaArea)
+function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,fileName,lastFrame,maskCircle,thresholdDiffPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,minLarvaArea,maxLarvaArea,maxMajorAxisLength)
 
     centroid2Check=[];
     counter=0;
@@ -9,7 +9,10 @@ function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,f
         % Use bwareafilt to keep objects within the specified area range
         larva1 = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
         larva2 = bwareafilt(larva2, [minLarvaArea,maxLarvaArea]);
-    
+        %filter by maximum major axis length
+        larva1 = bwpropfilt(larva1,'MajorAxisLength',[0 maxMajorAxisLength]);
+        larva2 = bwpropfilt(larva2,'MajorAxisLength',[0 maxMajorAxisLength]);
+
         % Detect the larva position to do not consider noisy regions far
         % from larva position
         labelLarva = bwlabel(larva1);
@@ -37,6 +40,9 @@ function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,f
             larva1 = abs(croppedBackGround - imgPrevious) > thresholdDiffPixelsValue;
             larva2 = bwareafilt(larva2, [minLarvaArea,maxLarvaArea]);
             larva1 = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
+            %filter by maximum major axis length
+            larva1 = bwpropfilt(larva1,'MajorAxisLength',[0 maxMajorAxisLength]);
+            larva2 = bwpropfilt(larva2,'MajorAxisLength',[0 maxMajorAxisLength]);
     
             try
                 [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(imgEnd, imgPrevious, croppedBackGround, thresholdDiffPixelsValue, numberOfPixelsThreshold, pixels2CheckFromCentroid, centroid2Check, larvaFilt,minLarvaArea,maxLarvaArea);
@@ -53,6 +59,9 @@ function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,f
         % Use bwareafilt to keep objects within the specified area range
         larva1 = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
         larva2 = bwareafilt(larva2, [minLarvaArea,maxLarvaArea]);
+        %filter by maximum major axis length
+        larva1 = bwpropfilt(larva1,'MajorAxisLength',[0 maxMajorAxisLength]);
+        larva2 = bwpropfilt(larva2,'MajorAxisLength',[0 maxMajorAxisLength]);
 
         % Detect the larva position to do not consider noisy regions far
         % from larva position
