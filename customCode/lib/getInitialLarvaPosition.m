@@ -2,7 +2,7 @@ function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,f
 
     centroid2Check=[];
     counter=0;
-    while isempty(centroid2Check) && counter<lastFrame-1
+    while counter<lastFrame-1
         % Initialize variables for larva tracking (from init)
         larva1 = abs(croppedBackGround - imread(fileName, lastFrame-counter).*maskCircle) > thresholdDiffPixelsValue;
         larva2 = abs(croppedBackGround - imread(fileName, lastFrame-1-counter).*maskCircle) > thresholdDiffPixelsValue;
@@ -15,7 +15,7 @@ function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,f
 
         % Detect the larva position to do not consider noisy regions far
         % from larva position
-        labelLarva = bwlabel(larva1);
+        labelLarva = bwlabel(larva2);
         labels = labelLarva(abs(larva2 - larva1) > 0);
         if ~any(labels)
             larvaFilt = labelLarva == mode(labelLarva(larva2));

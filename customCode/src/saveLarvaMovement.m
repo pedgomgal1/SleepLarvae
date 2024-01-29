@@ -1,4 +1,4 @@
-function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,maxMajorAxisLength,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii,frameToStartLarvaSearching)
+function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,maxMajorAxisLength,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii,wellPaddingROI,frameToStartLarvaSearching)
 
         % Extract the folder path from the input file name
         [folderPath, ~, ~] = fileparts(fileName);
@@ -12,8 +12,7 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
         [centerROIs,radiiWells,metric] = imfindcircles(imageBackground,rangeWellRadii,'Sensitivity',0.99);
         figure('Visible','off')
         imshow(imageBackground); hold on; viscircles(centerROIs(1,:), radiiWells(1),'EdgeColor','b');
-        paddingCircle=3; %extra radius
-        circ = drawcircle('Center',centerROIs(1,:),'Radius',radiiWells(1)+paddingCircle);
+        circ = drawcircle('Center',centerROIs(1,:),'Radius',radiiWells(1)+wellPaddingROI);
         maskCircle = uint8(createMask(circ));
         close all;
         croppedBackGround = imageBackground.*maskCircle;
@@ -22,8 +21,8 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
         %%Identify larva in the first frame after tracking larva movement
         %%From the end to the beggining of the experiment
         [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,fileName,frameToStartLarvaSearching,maskCircle,thresholdDiffPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,minLarvaArea,maxLarvaArea,maxMajorAxisLength);
+
 %         imshow([croppedBackGround,uint8(larvaFilt)*255,imread(fileName, 1).*maskCircle])
-        
         % Initialize arrays to store tracking data
         arrayBouts = [];
         arrayPixels = [];
