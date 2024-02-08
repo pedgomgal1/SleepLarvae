@@ -59,4 +59,5 @@ data/*
 FlyGui/*
 results/*
 LarvaLodge/*
+biaPySegmentation/*
 sync.ffs_db
