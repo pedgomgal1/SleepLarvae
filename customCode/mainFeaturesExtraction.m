@@ -36,11 +36,12 @@ minLarvaArea = 10; %do not consider blobs smaller than 10 pixels (could happen w
 numberOfPixelsThreshold = 5; %Number of different pixels between segmented larva in frame n and n+1 to be considered a bout
 pixels2CheckFromCentroid=45; %field of view from previous larva centroid for larva tracking. To avoid artifacts far from the larvae.
 nImagesPerHour=600;
+maxNan = 200; %number max of frames in which a larva cannot be tracked. If we overpass the threshold the experiment is discarded. 10 frames = 1 minute
 
 
 if strcmp(countBouts, 'Yes')
     for nDir = 1:size(directoryROIs,1)
         countBoutsPerHour(directoryROIs{nDir},rangeWellRadii,wellPaddingROI,frameToStartLarvaSearching,thresholdDiffPixelsValue,maxLarvaArea,maxMajorAxisLength,...
-            minLarvaArea,numberOfPixelsThreshold,pixels2CheckFromCentroid,nImagesPerHour)
+            minLarvaArea,numberOfPixelsThreshold,pixels2CheckFromCentroid,nImagesPerHour,maxNan)
     end
 end

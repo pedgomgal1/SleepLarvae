@@ -1,4 +1,4 @@
-function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,maxMajorAxisLength,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii,wellPaddingROI,frameToStartLarvaSearching)
+function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,maxMajorAxisLength,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii,wellPaddingROI,frameToStartLarvaSearching,maxNan)
 
         % Extract the folder path from the input file name
         [folderPath, ~, ~] = fileparts(fileName);
@@ -39,7 +39,7 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
         counterNan = 0;
 
         %% Detect larva position across the whole experiment
-        while counterNan<100
+        while counterNan<maxNan
             for nTempImg = 1:size(infoImage,1)-1
                 % Read two consecutive frames
                 img1 = imread(fileName, nTempImg).*maskCircle;
@@ -51,7 +51,8 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
                     larva1 = abs(imageBackground - img1) > thresholdDiffPixelsValue;
                     larvaFilt = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
                     larvaFilt = bwpropfilt(larvaFilt,'MajorAxisLength',[0 maxMajorAxisLength]);
-                    centroid2Check = struct2array(regionprops(bwareafilt(larvaFilt,1), 'Centroid'));
+                    centroid2Check = regionprops(bwareafilt(larvaFilt,1), 'Centroid');
+                    if isempty(centroid2Check), centroid2Check=[]; else, centroid2Check = centroid2Check.Centroid; end
                 end
     
                 try
@@ -72,7 +73,8 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
                         larva1 = abs(imageBackground - img1) > thresholdDiffPixelsValue;
                         larvaFilt = bwareafilt(larva1, 1);
                         if sum(centroid2Check) == 0
-                            centroid2Check = struct2array(regionprops(larvaFilt, 'Centroid'));
+                            centroid2Check = regionprops(larvaFilt, 'Centroid');
+                            if isempty(centroid2Check), centroid2Check=[]; else, centroid2Check = centroid2Check.Centroid; end
                         end
                         [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(img1, img2, imageBackground, thresholdDiffPixelsValue, numberOfPixelsThreshold, pixels2CheckFromCentroid, centroid2Check, larvaFilt,minLarvaArea,maxLarvaArea,maxMajorAxisLength);
                         
@@ -87,10 +89,10 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
                         imwrite(ones(size(larvaFilt)), fullfile(folderPath, 'binaryLarva', [num2str(nTempImg + 1) '_NaN.jpg']));
                         
                         % Exit loop if too many exceptions occur
-                        if counterNan == 100
+                        if counterNan == maxNan
                             disp(['Too many NaN in: ' folderPath])
                             try 
-                                rmdir(folderPath,'s');
+%                                 rmdir(folderPath,'s');
                             catch
 
                             end
@@ -117,7 +119,7 @@ function saveLarvaMovement(fileName,thresholdDiffPixelsValue,numberOfPixelsThres
                     
                     save(fullfile(folderPath,'boutsData','boutsPerHour.mat'),'cellBouts')
                     disp([folderPath ' number of NaNs images: ' num2str(sum(cellBouts.numNaNs))])
-                    counterNan=100;
+                    counterNan=maxNan;
                 end
     
             end

@@ -22,7 +22,9 @@ function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,f
         else
             larvaFilt = labelLarva == mode(labels(labels > 0));
         end
-        centroid2Check = struct2array(regionprops(larvaFilt, 'Centroid'));
+         
+        centroid2Check = regionprops(larvaFilt, 'Centroid');
+        if isempty(centroid2Check), centroid2Check=[]; else, centroid2Check = centroid2Check.Centroid; end
         
         counter=counter+1;
 
@@ -72,6 +74,7 @@ function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,f
         else
             larvaFilt = labelLarva == mode(labels(labels > 0));
         end
-        centroid2Check = struct2array(regionprops(larvaFilt, 'Centroid'));
+        centroid2Check = regionprops(larvaFilt, 'Centroid');
+        if isempty(centroid2Check), centroid2Check=[]; else, centroid2Check = centroid2Check.Centroid; end
     end
 end
