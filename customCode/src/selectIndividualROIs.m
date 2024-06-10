@@ -25,6 +25,7 @@ function directoryROIs = selectIndividualROIs(bigImgPath,genotypes,cropNow,range
                                 idROIsExist(nRoi) = exist(folderRoi{nRoi},'dir');
                             end
                             folderRoi(idROIsExist)=[];
+                            ROIsGen(idROIsExist,:)=[];
                         end
                         if ~isempty(folderRoi)
                             parfor nRoi = 1:size(folderRoi,1)

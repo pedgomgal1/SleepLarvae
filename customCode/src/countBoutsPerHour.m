@@ -1,5 +1,4 @@
-function countBoutsPerHour(directoryROIs,rangeWellRadii,wellPaddingROI,frameToStartLarvaSearching,thresholdDiffPixelsValue,maxLarvaArea,maxMajorAxisLength,...
-            minLarvaArea,numberOfPixelsThreshold,pixels2CheckFromCentroid,nImagesPerHour,maxNan)
+function countBoutsPerHour(directoryROIs,globalFeatures)
 
     folderROIdir = dir(fullfile(directoryROIs,'**','ROI_*.tif'));
 
@@ -9,7 +8,7 @@ function countBoutsPerHour(directoryROIs,rangeWellRadii,wellPaddingROI,frameToSt
         disp(['Running analysis: ' pathROI_tif])
         try
             if ~exist(fullfile(folderROIdir(nROIFolders).folder,'boutsData','boutsPerHour.mat'),'file')
-                saveLarvaMovement(pathROI_tif,thresholdDiffPixelsValue,numberOfPixelsThreshold,minLarvaArea,maxLarvaArea,maxMajorAxisLength,pixels2CheckFromCentroid,nImagesPerHour,rangeWellRadii,wellPaddingROI,frameToStartLarvaSearching,maxNan);
+                saveLarvaMovement(pathROI_tif,globalFeatures);
             end
         catch
             disp(['ERROR.check individually ->' pathROI_tif])

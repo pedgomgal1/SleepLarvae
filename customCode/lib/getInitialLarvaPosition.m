@@ -1,17 +1,18 @@
-function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,fileName,lastFrame,maskCircle,thresholdDiffPixelsValue,numberOfPixelsThreshold,pixels2CheckFromCentroid,minLarvaArea,maxLarvaArea,maxMajorAxisLength)
+function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,fileName,maskCircle,globalFeatures)
 
     centroid2Check=[];
     counter=0;
+    lastFrame=globalFeatures.frameToStartLarvaSearching;
     while counter<lastFrame-1
         % Initialize variables for larva tracking (from init)
-        larva1 = abs(croppedBackGround - imread(fileName, lastFrame-counter).*maskCircle) > thresholdDiffPixelsValue;
-        larva2 = abs(croppedBackGround - imread(fileName, lastFrame-1-counter).*maskCircle) > thresholdDiffPixelsValue;
+        larva1 = abs(croppedBackGround - imread(fileName, lastFrame-counter).*maskCircle) > globalFeatures.thresholdDiffPixelsValue;
+        larva2 = abs(croppedBackGround - imread(fileName, lastFrame-1-counter).*maskCircle) > globalFeatures.thresholdDiffPixelsValue;
         % Use bwareafilt to keep objects within the specified area range
-        larva1 = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
-        larva2 = bwareafilt(larva2, [minLarvaArea,maxLarvaArea]);
+        larva1 = bwareafilt(larva1, [globalFeatures.minLarvaArea,globalFeatures.maxLarvaArea]);
+        larva2 = bwareafilt(larva2, [globalFeatures.minLarvaArea,globalFeatures.maxLarvaArea]);
         %filter by maximum major axis length
-        larva1 = bwpropfilt(larva1,'MajorAxisLength',[0 maxMajorAxisLength]);
-        larva2 = bwpropfilt(larva2,'MajorAxisLength',[0 maxMajorAxisLength]);
+        larva1 = bwpropfilt(larva1,'MajorAxisLength',[0 globalFeatures.maxMajorAxisLength]);
+        larva2 = bwpropfilt(larva2,'MajorAxisLength',[0 globalFeatures.maxMajorAxisLength]);
 
         % Detect the larva position to do not consider noisy regions far
         % from larva position
@@ -37,33 +38,23 @@ function [centroid2Check, larvaFilt]=getInitialLarvaPosition(croppedBackGround,f
             imgEnd = imread(fileName, nTempImg).*maskCircle;
             imgPrevious = imread(fileName, nTempImgPrevious).*maskCircle;
     
-            % Initialize variables for larva tracking (from init)
-            larva2 = abs(croppedBackGround - imgEnd) > thresholdDiffPixelsValue;
-            larva1 = abs(croppedBackGround - imgPrevious) > thresholdDiffPixelsValue;
-            larva2 = bwareafilt(larva2, [minLarvaArea,maxLarvaArea]);
-            larva1 = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
-            %filter by maximum major axis length
-            larva1 = bwpropfilt(larva1,'MajorAxisLength',[0 maxMajorAxisLength]);
-            larva2 = bwpropfilt(larva2,'MajorAxisLength',[0 maxMajorAxisLength]);
-    
             try
-                [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(imgEnd, imgPrevious, croppedBackGround, thresholdDiffPixelsValue, numberOfPixelsThreshold, pixels2CheckFromCentroid, centroid2Check, larvaFilt,minLarvaArea,maxLarvaArea);
+                [isMoving, difImage, nPixels, centroid2Check, larvaFilt] = isLarvaSleeping(imgEnd, imgPrevious, croppedBackGround, centroid2Check,globalFeatures);
             catch
-                
             end
         end
     else
         disp('Larva not found - trying conventional mode')
 
         % Initialize variables for larva tracking (from init)
-        larva1 = abs(croppedBackGround - imread(fileName, 1).*maskCircle) > thresholdDiffPixelsValue;
-        larva2 = abs(croppedBackGround - imread(fileName, 2).*maskCircle) > thresholdDiffPixelsValue;
+        larva1 = abs(croppedBackGround - imread(fileName, 1).*maskCircle) > globalFeatures.thresholdDiffPixelsValue;
+        larva2 = abs(croppedBackGround - imread(fileName, 2).*maskCircle) > globalFeatures.thresholdDiffPixelsValue;
         % Use bwareafilt to keep objects within the specified area range
-        larva1 = bwareafilt(larva1, [minLarvaArea,maxLarvaArea]);
-        larva2 = bwareafilt(larva2, [minLarvaArea,maxLarvaArea]);
+        larva1 = bwareafilt(larva1, [globalFeatures.minLarvaArea,globalFeatures.maxLarvaArea]);
+        larva2 = bwareafilt(larva2, [globalFeatures.minLarvaArea,globalFeatures.maxLarvaArea]);
         %filter by maximum major axis length
-        larva1 = bwpropfilt(larva1,'MajorAxisLength',[0 maxMajorAxisLength]);
-        larva2 = bwpropfilt(larva2,'MajorAxisLength',[0 maxMajorAxisLength]);
+        larva1 = bwpropfilt(larva1,'MajorAxisLength',[0 globalFeatures.maxMajorAxisLength]);
+        larva2 = bwpropfilt(larva2,'MajorAxisLength',[0 globalFeatures.maxMajorAxisLength]);
 
         % Detect the larva position to do not consider noisy regions far
         % from larva position
