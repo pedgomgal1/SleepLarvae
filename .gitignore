@@ -61,3 +61,4 @@ results/*
 LarvaLodge/*
 biaPySegmentation/*
 sync.ffs_db
+/SemanticSegmentation
